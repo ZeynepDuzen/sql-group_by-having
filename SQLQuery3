@@ -1,0 +1,71 @@
+use HastahaneDB
+--Randevu sayisi 20 ve 20'den fazla olan doktorlari listele
+select DoktorID,count(RandevularID) as 'Randevu Sayisi' from Randevular group by DoktorID
+having count(RandevularID)>=20
+--**********************************************************
+use NORTHWND
+--herbir categoride kac urun oldugunu hesapla
+select CategoryID,sum(UnitsInStock) as 'Urun stogu' from Products group by CategoryID
+--stogu 500 ve uzerinde olan categorileri goster
+select CategoryID,sum(UnitsInStock) as 'Urun stogu' from Products group by CategoryID
+having sum(UnitsInStock)>=500
+--**********************************************************
+--herbir sehirde kac musterinin oldugunu hesapla
+select City,count(CustomerID) as 'Musteri Sayisi' from Customers group by City
+--Musteri sayisi 2 ve uzerinde olanları hesapla
+select City,COUNT(CustomerID) as 'Musteri Sayisi' from Customers group by City
+having count(CustomerID)>=2 order by 'Musteri Sayisi'
+--*********************************************************
+--herbir musterinin kac siparisi oldugunu hesapla
+select CustomerID,count(OrderID) as 'Siparis Sayisi' from Orders group by CustomerID
+--siparis sayisi 15 ustu olanlari listele
+select CustomerID,count(OrderID) as 'Siparis sayisi' from Orders group by CustomerID
+having count(OrderID)>15 order by 'Siparis sayisi'
+--********************************************************
+--Herbir ulkeden kac siparis var? Siparis sayisi 20 ve ustunde olanlari listele
+select ShipCountry,count(OrderID) as 'Siparis sayisi' from Orders group by ShipCountry
+having count(OrderID)>=20 order by [Siparis sayisi]
+--*********************************************************
+use SabitSistemDB
+--Ogrenci adi,soyadi,adres ve veli adi listeleyen subquery
+select *from Ogrenciler
+select *from Veliler
+
+select Ogrenciler.Adi,Ogrenciler.Soyadi,Ogrenciler.Adres,
+(select Veliler.VeliAdi+' '+Veliler.VeliSoyadi from Veliler where Ogrenciler.VeliID=VelilerID) as 'Veli Adi Soyadi'
+from Ogrenciler
+--*******************************************************
+use NORTHWND
+--urun adi,category adi,fiyatı,urun stogu listesini olustur
+select *from Products
+select *from Categories
+
+select Products.ProductName,Products.UnitPrice,Products.UnitsInStock, 
+(select CategoryName from Categories where Products.CategoryID=CategoryID) as 'Category Name'
+from Products
+
+--herbir siparisin siparis tarihi,kargo degeri(freight),siparisi alan firma(companyname),firma yetkilisi(contactname)
+--sipariste gorevli personel(employeename-lastname)listesi
+
+select *from Orders
+select *from Customers
+select *from Employees
+
+select Orders.OrderDate,Orders.Freight, 
+(select Employees.FirstName+' '+Employees.LastName from Employees where Orders.EmployeeID=Employees.EmployeeID) as 'Employees name-lastname',
+(select Customers.CompanyName from Customers where Orders.CustomerID=Customers.CustomerID) as 'Company name',
+(select Customers.ContactName from Customers where Orders.CustomerID=Customers.CustomerID) as 'Contact name'
+from Orders
+
+--her bir siparişteki ürünün ne kadara satıldığını, satılan stok değerini, ürün adını, sipariş tarihini listeleyecek şekilde kodlayınız?
+select *from Orders
+select *from [Order Details]
+select *from Products
+
+select
+(select ProductName from Products where Products.ProductID=[Order Details].ProductID) as 'Product name',
+(select OrderDate from Orders where Orders.OrderID=[Order Details].OrderID) as 'Order date',
+UnitPrice,
+Quantity,
+UnitPrice*Quantity as 'toplam odenen'
+from [Order Details]
